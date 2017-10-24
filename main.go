@@ -60,17 +60,21 @@ func monkey(id int, target string, updates chan report, done *sync.WaitGroup) {
 	}
 }
 
-func printResults(results map[int]int, target string) {
-	tm.MoveCursor(1, 1)
+func printResults(results []int, target string) {
+	tm.MoveCursor(1, 2)
 	for id, highwater := range results {
-		tm.Print("Monkey ", id, " - |", target[:highwater+1], "|")
-		tm.Flush()
+		tm.Print("Monkey ", id)
+		tm.MoveCursor(20, id+2) // NOTE: If the header gets longer, this "2" needs to change.
+		tm.Print("|", target[:highwater+1], "|")
+		tm.Flush() // adds line break
 	}
 
 }
 
 func main() {
 	tm.Clear() // Clear current screen
+	tm.MoveCursor(1, 1)
+	tm.Print("MONKEYSIM")
 
 	var monkeyCount int
 	var err error
@@ -86,7 +90,7 @@ func main() {
 
 	updates := make(chan report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}       // how we know when all the monkeys are done
-	highwater := make(map[int]int)    // best each monkey's done
+	highwater := []int{}              // best each monkey's done
 
 	// read the target file
 	file, err := ioutil.ReadFile("target.txt")
@@ -100,6 +104,7 @@ func main() {
 	for i := 0; i < monkeyCount; i++ {
 		go monkey(i, target, updates, toWait)
 		toWait.Add(1)
+		highwater = append(highwater, -1) // so everybody's entry is in the right spot
 	}
 	// once all the monkeys say they're done, close the updates channel
 	go func() {

@@ -6,8 +6,15 @@ import (
 	"math/rand"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
+	"sync"
 )
+
+// report - how monkeys check in with the master process
+type report struct {
+	id, highwater int
+}
 
 // processTarget - Turns file contents into a string containing only a-z characters
 func processTarget(input []byte) (output string) {
@@ -26,48 +33,67 @@ func processTarget(input []byte) (output string) {
 }
 
 // monkey - frantically typing random characters
-func monkey(id int, done chan bool) {
-	fmt.Printf("\n=======NEW MONKEY %d!========\n", id)
+func monkey(id int, target string, updates chan report, done *sync.WaitGroup) {
+	defer done.Done()
 	rand.Seed(int64(id))
 	possibilities := "abcdefghijklmnopqrstuvqxyz    "
 
-	file, err := ioutil.ReadFile("target.txt")
-	if err != nil {
-		fmt.Printf("\n\nERROR=======\n|%v|\n\n", err)
-		os.Exit(1)
-	}
-	target := processTarget(file)
-
-	currentPosition := 0
+	currentSearch := 0
 	highwater := -1
 
-	for {
+	for i := 0; i < 999999; i++ {
 		keyPress := possibilities[rand.Intn(len(possibilities))]
-		if keyPress == target[currentPosition] {
-			if currentPosition > highwater {
-				fmt.Printf("\n%d - NEW HIGH POINT: was %v, now %v: |%v|", id, highwater, currentPosition, target[:currentPosition+1])
-				highwater = currentPosition
+		if keyPress == target[currentSearch] {
+			if currentSearch > highwater {
+				highwater = currentSearch
+				updates <- report{id, highwater}
 			}
-			currentPosition++
+			currentSearch++
 			continue
 		}
 		// if we were on a streak, but it's over
-		if currentPosition > 0 {
-			if highwater > 5 && highwater == currentPosition { // if we were close
-				fmt.Printf("\n%d - just missed: %s%s", id, target[:currentPosition], string(keyPress))
-			}
-			currentPosition = 0
+		if currentSearch > 0 {
+			currentSearch = 0
 		}
 	}
 }
 
 func main() {
-	monkeyCount := 8
-
-	done := make(chan bool, monkeyCount)
-
-	for i := 0; i < monkeyCount; i++ {
-		go monkey(i, done)
+	var monkeyCount int
+	var err error
+	if len(os.Args) > 1 {
+		monkeyCount, err = strconv.Atoi(os.Args[1])
+		if err != nil {
+			fmt.Printf("\nFATAL: MonkeyCount parameter could not be converted to int: %v", err)
+			os.Exit(1)
+		}
+	} else {
+		monkeyCount = 1
 	}
-	<-done // note: this will never actually happen
+
+	updates := make(chan report, 100) // how monkeys check in with us
+	toWait := &sync.WaitGroup{}       // how we know when all the monkeys are done
+
+	// read the target file
+	file, err := ioutil.ReadFile("target.txt")
+	if err != nil {
+		fmt.Printf("\n\nERROR reading file: |%v|\n\n", err)
+		os.Exit(1)
+	}
+	target := processTarget(file)
+
+	// send in the monkeys!
+	for i := 0; i < monkeyCount; i++ {
+		go monkey(i, target, updates, toWait)
+		toWait.Add(1)
+	}
+	// once all the monkeys say they're done, close the updates channel
+	go func() {
+		toWait.Wait()
+		close(updates)
+	}()
+	// listen for updates
+	for update := range updates {
+		fmt.Printf("\n%d - NEW HIGH: %s", update.id, target[:update.highwater+1])
+	}
 }

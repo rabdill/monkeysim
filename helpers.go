@@ -2,12 +2,28 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/rabdill/monkeysim/printer"
 )
+
+func getSeatCount() (seatCount int) {
+	var err error
+	if len(os.Args) > 1 {
+		seatCount, err = strconv.Atoi(os.Args[1])
+		if err != nil {
+			fmt.Printf("\nFATAL: seatCount parameter could not be converted to int: %v", err)
+			os.Exit(1)
+		}
+	} else {
+		seatCount = 1
+	}
+	return
+}
 
 // processTarget - Turns file contents into a string containing only a-z characters
 func processTarget(input []byte) (output string) {
@@ -25,16 +41,16 @@ func processTarget(input []byte) (output string) {
 	return
 }
 
-func processInput(input string, monkeyCount int) {
+func processInput(input string, seatCount int) {
 	switch input {
 	case "exit":
-		printer.MoveCursor(0, monkeyCount+9)
+		printer.MoveCursor(0, seatCount+9)
 		os.Exit(0)
 	}
 }
 
-func getInput(monkeyCount int, reader *bufio.Reader) string {
-	printer.MoveCursor(20, monkeyCount+4)
+func getInput(seatCount int, reader *bufio.Reader) string {
+	printer.MoveCursor(20, seatCount+4)
 	text, _ := reader.ReadString('\n')
 	return strings.TrimRight(text, "\n")
 }

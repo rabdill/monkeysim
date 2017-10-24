@@ -5,9 +5,15 @@ import (
 	"sync"
 )
 
+// Monkey - used to keep track of performance and monkey bio
+type Monkey struct {
+	Name      string
+	Highwater int
+}
+
 // Report - how monkeys check in with the master process
 type Report struct {
-	Id, Highwater int
+	ID, Highwater int
 }
 
 // StartTyping - frantically typing random characters

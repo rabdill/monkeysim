@@ -6,14 +6,14 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/rabdill/monkeysim/monkey"
+	"github.com/rabdill/monkeysim/printer"
 )
 
 func main() {
-	ClearScreen()
+	printer.ClearScreen()
 	var monkeyCount int
 	var err error
 	if len(os.Args) > 1 {
@@ -25,8 +25,8 @@ func main() {
 	} else {
 		monkeyCount = 1
 	}
-	PrintAtCursor(0, 0, "MONKEYSIM")
-	PrintAtCursor(0, monkeyCount+4, "Enter command: ")
+	printer.AtCursor(0, 0, "MONKEYSIM")
+	printer.AtCursor(0, monkeyCount+4, "Enter command: ")
 
 	updates := make(chan monkey.Report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}              // how we know when all the monkeys are done
@@ -56,30 +56,16 @@ func main() {
 		// listen for updates
 		for update := range updates {
 			highwater[update.Id] = update.Highwater
-			printResults(highwater, target)
+			printer.Results(highwater, target)
 		}
 	}()
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		input := getInput(monkeyCount, reader)
-		PrintAtCursor(0, monkeyCount+7, ClearingString())
-		PrintAtCursor(0, monkeyCount+7, fmt.Sprintf("YOU ENTERED %s", input))
-		PrintAtCursor(20, monkeyCount+4, ClearingString())
+		printer.AtCursor(0, monkeyCount+7, printer.ClearingString())
+		printer.AtCursor(0, monkeyCount+7, fmt.Sprintf("YOU ENTERED %s", input))
+		printer.AtCursor(20, monkeyCount+4, printer.ClearingString())
 		processInput(input, monkeyCount)
 	}
-}
-
-func processInput(input string, monkeyCount int) {
-	switch input {
-	case "exit":
-		MoveCursor(0, monkeyCount+9)
-		os.Exit(0)
-	}
-}
-
-func getInput(monkeyCount int, reader *bufio.Reader) string {
-	MoveCursor(20, monkeyCount+4)
-	text, _ := reader.ReadString('\n')
-	return strings.TrimRight(text, "\n")
 }

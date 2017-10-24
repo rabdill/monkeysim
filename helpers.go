@@ -3,10 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/rabdill/monkeysim/monkey"
 	"github.com/rabdill/monkeysim/printer"
@@ -26,9 +28,20 @@ func getSeatCount() (seatCount int) {
 	return
 }
 
+func closeChannelWhenDone(waitgroup *sync.WaitGroup, channel chan monkey.Report) {
+	waitgroup.Wait()
+	close(channel)
+}
+
 // processTarget - Turns file contents into a string containing only a-z characters
-func processTarget(input []byte) (output string) {
-	output = string(input)
+func getTarget(file string) (output string) {
+	// read the target file
+	contents, err := ioutil.ReadFile(file)
+	if err != nil {
+		fmt.Printf("\n\nERROR reading file: |%v|\n\n", err)
+		os.Exit(1)
+	}
+	output = string(contents)
 	output = strings.ToLower(output)
 
 	// cut out line breaks:
@@ -71,5 +84,7 @@ func findMonkeyInList(haystack []monkey.Monkey, needle string) int {
 func getInput(seatCount int, reader *bufio.Reader) string {
 	printer.MoveCursor(20, seatCount+4)
 	text, _ := reader.ReadString('\n')
+	printer.AtCursor(0, seatCount+7, printer.ClearingString())  // clear the last command's status message
+	printer.AtCursor(20, seatCount+4, printer.ClearingString()) // clear the command line for the next command
 	return strings.TrimRight(text, "\n")
 }

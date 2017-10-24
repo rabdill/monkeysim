@@ -29,10 +29,12 @@ func AtCursor(x, y int, toPrint string) {
 }
 
 // ClearScreen - wipe out most stuff that's going to be in the way
-func ClearScreen() {
+func ClearScreen(seatCount int) {
 	for i := 0; i < 50; i++ {
 		AtCursor(0, i, ClearingString())
 	}
+	AtCursor(0, 0, "MONKEYSIM")
+	AtCursor(0, seatCount+4, "Enter command: ")
 }
 
 // ClearingString - a long blank string for zeroing out the display

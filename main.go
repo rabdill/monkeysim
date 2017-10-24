@@ -12,11 +12,8 @@ import (
 )
 
 func main() {
-	printer.ClearScreen()
 	seatCount := getSeatCount()
-
-	printer.AtCursor(0, 0, "MONKEYSIM")
-	printer.AtCursor(0, seatCount+4, "Enter command: ")
+	printer.ClearScreen(seatCount)
 
 	updates := make(chan monkey.Report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}              // how we know when all the monkeys are done
@@ -35,7 +32,7 @@ func main() {
 		go monkey.StartTyping(i, target, updates, toWait)
 		toWait.Add(1)
 		seats = append(seats, monkey.Monkey{
-			Name:      fmt.Sprintf("Monkey %d", i),
+			Name:      fmt.Sprintf("Monkey%d", i),
 			Highwater: -1,
 		})
 	}
@@ -55,11 +52,14 @@ func main() {
 
 	// keep an eye out for user input
 	reader := bufio.NewReader(os.Stdin)
+	var response string
 	for {
 		input := getInput(seatCount, reader)
 		printer.AtCursor(0, seatCount+7, printer.ClearingString())
-		printer.AtCursor(0, seatCount+7, fmt.Sprintf("YOU ENTERED %s", input))
+		seats, response = processInput(input, seats)
+		printer.ClearScreen(seatCount)
+		printer.Results(seats, target) // reprint table in case a monkey got renamed
+		printer.AtCursor(0, seatCount+7, response)
 		printer.AtCursor(20, seatCount+4, printer.ClearingString())
-		processInput(input, seatCount)
 	}
 }

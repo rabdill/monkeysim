@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rabdill/monkeysim/monkey"
 	"github.com/rabdill/monkeysim/printer"
 )
 
@@ -41,12 +42,30 @@ func processTarget(input []byte) (output string) {
 	return
 }
 
-func processInput(input string, seatCount int) {
-	switch input {
+func processInput(input string, seats []monkey.Monkey) ([]monkey.Monkey, string) {
+	command := strings.Split(input, " ")
+	switch command[0] {
 	case "exit":
-		printer.MoveCursor(0, seatCount+9)
+		printer.MoveCursor(0, len(seats)+9)
 		os.Exit(0)
+	case "rename":
+		index := findMonkeyInList(seats, command[1])
+		if index < 0 {
+			return seats, "ERROR: Could not find monkey by that name to rename."
+		}
+		seats[index].Name = command[2]
+		return seats, fmt.Sprintf("Renamed %s to %s.", command[1], command[2])
 	}
+	return seats, fmt.Sprintf("Unrecognized command: %s", input)
+}
+
+func findMonkeyInList(haystack []monkey.Monkey, needle string) int {
+	for i, monkey := range haystack {
+		if monkey.Name == needle {
+			return i
+		}
+	}
+	return -1
 }
 
 func getInput(seatCount int, reader *bufio.Reader) string {

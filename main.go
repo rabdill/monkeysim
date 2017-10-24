@@ -66,6 +66,15 @@ func main() {
 		PrintAtCursor(0, monkeyCount+7, ClearingString())
 		PrintAtCursor(0, monkeyCount+7, fmt.Sprintf("YOU ENTERED %s", input))
 		PrintAtCursor(20, monkeyCount+4, ClearingString())
+		processInput(input, monkeyCount)
+	}
+}
+
+func processInput(input string, monkeyCount int) {
+	switch input {
+	case "exit":
+		MoveCursor(0, monkeyCount+9)
+		os.Exit(0)
 	}
 }
 

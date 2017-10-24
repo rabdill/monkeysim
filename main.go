@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	tm "github.com/buger/goterm"
 )
 
 // report - how monkeys check in with the master process
@@ -41,7 +43,7 @@ func monkey(id int, target string, updates chan report, done *sync.WaitGroup) {
 	currentSearch := 0
 	highwater := -1
 
-	for i := 0; i < 999999; i++ {
+	for i := 0; i < 99999999; i++ {
 		keyPress := possibilities[rand.Intn(len(possibilities))]
 		if keyPress == target[currentSearch] {
 			if currentSearch > highwater {
@@ -58,7 +60,18 @@ func monkey(id int, target string, updates chan report, done *sync.WaitGroup) {
 	}
 }
 
+func printResults(results map[int]int, target string) {
+	tm.MoveCursor(1, 1)
+	for id, highwater := range results {
+		tm.Print("Monkey ", id, " - |", target[:highwater+1], "|")
+		tm.Flush()
+	}
+
+}
+
 func main() {
+	tm.Clear() // Clear current screen
+
 	var monkeyCount int
 	var err error
 	if len(os.Args) > 1 {
@@ -73,6 +86,7 @@ func main() {
 
 	updates := make(chan report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}       // how we know when all the monkeys are done
+	highwater := make(map[int]int)    // best each monkey's done
 
 	// read the target file
 	file, err := ioutil.ReadFile("target.txt")
@@ -94,6 +108,7 @@ func main() {
 	}()
 	// listen for updates
 	for update := range updates {
-		fmt.Printf("\n%d - NEW HIGH: %s", update.id, target[:update.highwater+1])
+		highwater[update.id] = update.highwater
+		printResults(highwater, target)
 	}
 }

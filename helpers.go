@@ -44,8 +44,14 @@ func PrintAtCursor(x, y int, toPrint string) {
 	fmt.Printf("\033[%d;%dH%s", y, x, toPrint)
 }
 
+// ClearScreen - wipe out most stuff that's going to be in the way
 func ClearScreen() {
 	for i := 0; i < 50; i++ {
-		PrintAtCursor(0, i, "                                                             ")
+		PrintAtCursor(0, i, ClearingString())
 	}
+}
+
+// ClearingString - a long blank string for zeroing out the display
+func ClearingString() string {
+	return "                                                                                                                  "
 }

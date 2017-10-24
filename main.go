@@ -63,7 +63,9 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		input := getInput(monkeyCount, reader)
+		PrintAtCursor(0, monkeyCount+7, ClearingString())
 		PrintAtCursor(0, monkeyCount+7, fmt.Sprintf("YOU ENTERED %s", input))
+		PrintAtCursor(20, monkeyCount+4, ClearingString())
 	}
 }
 

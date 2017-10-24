@@ -9,11 +9,11 @@ import (
 	"strings"
 	"sync"
 
-	tm "github.com/buger/goterm"
 	"github.com/rabdill/monkeysim/monkey"
 )
 
 func main() {
+	ClearScreen()
 	var monkeyCount int
 	var err error
 	if len(os.Args) > 1 {
@@ -25,12 +25,8 @@ func main() {
 	} else {
 		monkeyCount = 1
 	}
-	tm.Clear() // Clear current screen
-	tm.MoveCursor(1, 1)
-	tm.Print("MONKEYSIM")
-	tm.MoveCursor(1, monkeyCount+4)
-	tm.Print("Enter command: ")
-	tm.Flush() // adds line break
+	PrintAtCursor(0, 0, "MONKEYSIM")
+	PrintAtCursor(0, monkeyCount+4, "Enter command: ")
 
 	updates := make(chan monkey.Report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}              // how we know when all the monkeys are done
@@ -67,13 +63,12 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		input := getInput(monkeyCount, reader)
-		tm.MoveCursor(1, monkeyCount+7)
-		tm.Print("YOU ENTERED ", input)
+		PrintAtCursor(0, monkeyCount+7, fmt.Sprintf("YOU ENTERED %s", input))
 	}
 }
 
 func getInput(monkeyCount int, reader *bufio.Reader) string {
-	tm.MoveCursor(10, monkeyCount+4)
+	MoveCursor(20, monkeyCount+4)
 	text, _ := reader.ReadString('\n')
 	return strings.TrimRight(text, "\n")
 }

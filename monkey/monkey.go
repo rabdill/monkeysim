@@ -3,6 +3,7 @@ package monkey
 import (
 	"math/rand"
 	"sync"
+	"time"
 )
 
 // Monkey - used to keep track of performance and monkey bio
@@ -19,13 +20,12 @@ type Report struct {
 // StartTyping - frantically typing random characters
 func StartTyping(id int, target string, updates chan Report, done *sync.WaitGroup) {
 	defer done.Done()
-	rand.Seed(int64(id))
+	rand.Seed(time.Now().UnixNano() / (int64(id) + 1)) // has to be `id+1` because we have an id 0
 	possibilities := "abcdefghijklmnopqrstuvqxyz    "
 
 	currentSearch := 0
 	highwater := -1
 
-	// for i := 0; i < 99999999; i++ {
 	for {
 		keyPress := possibilities[rand.Intn(len(possibilities))]
 		if keyPress == target[currentSearch] {
@@ -37,8 +37,6 @@ func StartTyping(id int, target string, updates chan Report, done *sync.WaitGrou
 			continue
 		}
 		// if we were on a streak, but it's over
-		if currentSearch > 0 {
-			currentSearch = 0
-		}
+		currentSearch = 0
 	}
 }

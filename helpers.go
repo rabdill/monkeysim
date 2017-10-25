@@ -55,7 +55,7 @@ func getTarget(file string) (output string) {
 	return
 }
 
-func processInput(input string, seats []monkey.Monkey) ([]monkey.Monkey, string) {
+func processInput(input string, seats []*monkey.Monkey) string {
 	command := strings.Split(input, " ")
 	switch command[0] {
 	case "exit":
@@ -64,15 +64,15 @@ func processInput(input string, seats []monkey.Monkey) ([]monkey.Monkey, string)
 	case "rename":
 		index := findMonkeyInList(seats, command[1])
 		if index < 0 {
-			return seats, "ERROR: Could not find monkey by that name to rename."
+			return "ERROR: Could not find monkey by that name to rename."
 		}
 		seats[index].Name = command[2]
-		return seats, fmt.Sprintf("Renamed %s to %s.", command[1], command[2])
+		return fmt.Sprintf("Renamed %s to %s.", command[1], command[2])
 	}
-	return seats, fmt.Sprintf("Unrecognized command: %s", input)
+	return fmt.Sprintf("Unrecognized command: %s", input)
 }
 
-func findMonkeyInList(haystack []monkey.Monkey, needle string) int {
+func findMonkeyInList(haystack []*monkey.Monkey, needle string) int {
 	for i, monkey := range haystack {
 		if monkey.Name == needle {
 			return i

@@ -67,9 +67,9 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	var response string
 	for {
-		seats, response = processInput(getInput(seatCount, reader), seats, monkeyClient)
-		printer.ClearScreen(seatCount)
+		seats, response = processInput(getInput(len(seats), reader), seats, monkeyClient)
+		printer.ClearScreen(len(seats))
 		printer.Results(seats, target) // reprint table in case a monkey got renamed
-		printer.AtCursor(0, seatCount+7, response)
+		printer.AtCursor(0, len(seats)+7, response)
 	}
 }

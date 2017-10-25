@@ -15,7 +15,7 @@ func Results(results []*monkey.Monkey, target string) {
 		AtCursor(15, i+headerSize, fmt.Sprintf("%.2f kpms", monkey.Speed))
 		AtCursor(35, i+headerSize, fmt.Sprintf("|%s|", target[:monkey.Highwater+1]))
 		// go back to soliciting user input once we're done printing:
-		MoveCursor(20, len(results)+4)
+		AtCursor(0, len(results)+4, "Enter command: ")
 	}
 }
 

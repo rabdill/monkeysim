@@ -1,7 +1,6 @@
 package monkey
 
 import (
-	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -113,6 +112,5 @@ func convertTypingProfile(profile map[string]int) string {
 			answer = answer + char
 		}
 	}
-	fmt.Printf("\033[%d;%dH|%s|", 35, 0, answer)
 	return answer
 }

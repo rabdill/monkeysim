@@ -55,7 +55,10 @@ func getTarget(file string) (output string) {
 	return
 }
 
-func processInput(input string, seats []*monkey.Monkey) string {
+// NOTE: "seats" is a pointer to the slice because we need to
+// be able to modify the NUMBER of monkeys in the slice, which
+// we couldn't do if it was just a slice full of pointers.
+func processInput(input string, seats []*monkey.Monkey) ([]*monkey.Monkey, string) {
 	command := strings.Split(input, " ")
 	switch command[0] {
 	case "exit":
@@ -64,12 +67,32 @@ func processInput(input string, seats []*monkey.Monkey) string {
 	case "rename":
 		index := findMonkeyInList(seats, command[1])
 		if index < 0 {
-			return "ERROR: Could not find monkey by that name to rename."
+			return nil, "ERROR: Could not find monkey by that name to rename."
 		}
 		seats[index].Name = command[2]
-		return fmt.Sprintf("Renamed %s to %s.", command[1], command[2])
+		return seats, fmt.Sprintf("Renamed %s to %s.", command[1], command[2])
+	case "new":
+		seats, result := addNewMonkey(command, seats)
+		return seats, result
 	}
-	return fmt.Sprintf("Unrecognized command: %s", input)
+	return seats, fmt.Sprintf("Unrecognized command: %s", input)
+}
+
+func addNewMonkey(command []string, seats []*monkey.Monkey) ([]*monkey.Monkey, string) {
+	var monkeyName string
+	if len(command) < 2 {
+		monkeyName = fmt.Sprintf("Monkey%d", len(seats))
+	} else {
+		monkeyName = command[1]
+	}
+	newMonkey := monkey.Monkey{
+		ID:        len(seats),
+		Name:      monkeyName,
+		Highwater: -1,
+		Profile:   monkey.ConstructTypingProfile(),
+	}
+	seats = append(seats, &newMonkey)
+	return seats, fmt.Sprintf("Created new monkey %s", monkeyName)
 }
 
 func findMonkeyInList(haystack []*monkey.Monkey, needle string) int {

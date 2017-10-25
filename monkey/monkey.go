@@ -25,6 +25,27 @@ type SpeedReport struct {
 	Speed float64
 }
 
+// Client - used for storing parameters we'd need to make a new monkey
+type Client struct {
+	Target      string
+	Updates     chan Report
+	Done        *sync.WaitGroup
+	OutputTimer chan SpeedReport
+}
+
+// CreateNew - used for spawning a new monkey that's already typing
+func (client Client) CreateNew(name string, id int) *Monkey {
+	newMonkey := Monkey{
+		ID:        id,
+		Name:      name,
+		Highwater: -1,
+		Profile:   ConstructTypingProfile(),
+	}
+	go newMonkey.StartTyping(client.Target, client.Updates, client.Done, client.OutputTimer)
+	client.Done.Add(1)
+	return &newMonkey
+}
+
 // StartTyping - frantically typing random characters
 func (monkey Monkey) StartTyping(target string, updates chan Report, done *sync.WaitGroup, outputTimer chan SpeedReport) {
 	defer done.Done()

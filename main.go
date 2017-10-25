@@ -19,11 +19,21 @@ func main() {
 	seats := []*monkey.Monkey{}
 	target := getTarget("target.txt")
 	speedReports := make(chan monkey.SpeedReport, 500) // receiving speed reading from monkeys
+
+	monkeyClient := monkey.Client{
+		Target:      target,
+		Updates:     updates,
+		Done:        toWait,
+		OutputTimer: speedReports,
+	}
 	// listen for speed reports
 	go func() {
 		for report := range speedReports {
-			seats[report.ID].Speed = report.Speed
-			printer.Results(seats, target)
+			// ignore updates from monkeys that we don't know about yet
+			if report.ID < len(seats) {
+				seats[report.ID].Speed = report.Speed
+				printer.Results(seats, target)
+			}
 		}
 	}()
 
@@ -45,8 +55,11 @@ func main() {
 	// listen for updates
 	go func() {
 		for update := range updates {
-			seats[update.ID].Highwater = update.Highwater
-			printer.Results(seats, target)
+			// ignore updates from monkeys that we don't know about yet
+			if update.ID < len(seats) {
+				seats[update.ID].Highwater = update.Highwater
+				printer.Results(seats, target)
+			}
 		}
 	}()
 
@@ -54,7 +67,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	var response string
 	for {
-		seats, response = processInput(getInput(seatCount, reader), seats)
+		seats, response = processInput(getInput(seatCount, reader), seats, monkeyClient)
 		printer.ClearScreen(seatCount)
 		printer.Results(seats, target) // reprint table in case a monkey got renamed
 		printer.AtCursor(0, seatCount+7, response)

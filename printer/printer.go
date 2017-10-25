@@ -17,7 +17,6 @@ func Results(results []*monkey.Monkey, target string) {
 		// go back to soliciting user input once we're done printing:
 		MoveCursor(20, len(results)+4)
 	}
-	AtCursor(0, 35, fmt.Sprintf("|%v|", results))
 }
 
 // MoveCursor - shift terminal printer to particular coordinate

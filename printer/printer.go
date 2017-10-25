@@ -9,10 +9,11 @@ import (
 // Results - write a table of the monkeys' high scores to the terminal
 func Results(results []monkey.Monkey, target string) {
 	headerSize := 2 // NOTE: If the header gets longer, this "2" needs to change.
-	fmt.Print("\033[0;2H")
+
 	for i, monkey := range results {
 		AtCursor(0, i+headerSize, monkey.Name) // TODO: why write the monkeys' name over and over?
-		AtCursor(20, i+headerSize, fmt.Sprintf("|%s|", target[:monkey.Highwater+1]))
+		AtCursor(15, i+headerSize, fmt.Sprintf("%.2f kpms", monkey.Speed))
+		AtCursor(35, i+headerSize, fmt.Sprintf("|%s|", target[:monkey.Highwater+1]))
 		// go back to soliciting user input once we're done printing:
 		MoveCursor(20, len(results)+4)
 	}

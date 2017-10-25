@@ -17,12 +17,19 @@ func main() {
 	updates := make(chan monkey.Report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}              // how we know when all the monkeys are done
 	seats := []monkey.Monkey{}
-
 	target := getTarget("target.txt")
+	speedReports := make(chan monkey.SpeedReport, 500) // receiving speed reading from monkeys
+	// listen for speed reports
+	go func() {
+		for report := range speedReports {
+			seats[report.ID].Speed = report.Speed
+			printer.Results(seats, target)
+		}
+	}()
 
 	// send in the monkeys!
 	for i := 0; i < seatCount; i++ {
-		go monkey.StartTyping(i, target, updates, toWait)
+		go monkey.StartTyping(i, target, updates, toWait, speedReports)
 		toWait.Add(1)
 		seats = append(seats, monkey.Monkey{
 			Name:      fmt.Sprintf("Monkey%d", i),

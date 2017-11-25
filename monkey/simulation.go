@@ -1,53 +1,56 @@
 package monkey
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"sync"
 )
 
-var Seats []*Monkey
+// Seats holds the current roster of monkeys and their stats.
+var Seats []*monkey
+
+//Target holds the goal text that the monkeys are working toward.
 var Target string
 
+// KickOffSim starts the simulation and sets the first set of
+// monkeys off to typing.
 func KickOffSim() {
 	seatCount := getSeatCount()
-	ClearScreen(seatCount)
 
-	updates := make(chan Report, 100) // how monkeys check in with us
+	updates := make(chan report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}       // how we know when all the monkeys are done
-	Seats = []*Monkey{}
+	Seats = []*monkey{}
 	Target = getTarget("target.txt")
-	speedReports := make(chan SpeedReport, 500) // receiving speed reading from monkeys
+	speedReports := make(chan speedReport, 500) // receiving speed reading from monkeys
 
-	monkeyClient := Client{
-		Target:      Target,
-		Updates:     updates,
-		Done:        toWait,
-		OutputTimer: speedReports,
-	}
+	// monkeyClient := client{
+	// 	target:      Target,
+	// 	updates:     updates,
+	// 	done:        toWait,
+	// 	outputTimer: speedReports,
+	// }
 	// listen for speed reports
 	go func() {
 		for report := range speedReports {
 			// HACK: ignore updates from monkeys that we don't know about yet
-			if report.ID < len(Seats) {
-				Seats[report.ID].Speed = report.Speed
-				Results(Seats, Target)
+			// *tk when would this happen?!
+			if report.id < len(Seats) {
+				Seats[report.id].speed = report.speed
+				// *update screen
 			}
 		}
 	}()
 
 	// send in the monkeys!
 	for i := 0; i < seatCount; i++ {
-		newMonkey := Monkey{
-			ID:        i,
-			Name:      fmt.Sprintf("Monkey%d", i),
-			Highwater: -1,
-			Profile:   ConstructTypingProfile(),
+		newMonkey := monkey{
+			id:        i,
+			name:      fmt.Sprintf("Monkey%d", i),
+			highwater: -1,
+			profile:   constructTypingProfile(),
 		}
 		Seats = append(Seats, &newMonkey)
 
-		go newMonkey.StartTyping(Target, updates, toWait, speedReports)
+		go newMonkey.startTyping(Target, updates, toWait, speedReports)
 		toWait.Add(1)
 	}
 
@@ -56,35 +59,27 @@ func KickOffSim() {
 	go func() {
 		for update := range updates {
 			// HACK: ignore updates from monkeys that we don't know about yet
-			if update.ID < len(Seats) {
-				Seats[update.ID].Highwater = update.Highwater
-				Results(Seats, Target)
+			if update.id < len(Seats) {
+				Seats[update.id].highwater = update.highwater
+				// *update screen
 			}
 		}
 	}()
-
-	// keep an eye out for user input
-	reader := bufio.NewReader(os.Stdin)
-	var response string
-	for {
-		input := getInput(len(Seats), reader)
-		Seats, response = processInput(input, Seats, monkeyClient)
-		ClearScreen(len(Seats))
-		Results(Seats, Target) // reprint table in case a monkey got renamed
-		AtCursor(0, len(Seats)+7, response)
-	}
 }
 
+// Answer is the minified monkey entry sent to the HTML template.
 type Answer struct {
 	Name, Progress string
 }
 
+// FetchResults turns the collection of monkey stats into a format
+// that can be read by the HTML templates.
 func FetchResults() []Answer {
 
 	results := []Answer{}
 
 	for _, monkey := range Seats {
-		results = append(results, Answer{monkey.Name, fmt.Sprintf("|%s|", Target[:monkey.Highwater+1])})
+		results = append(results, Answer{monkey.name, fmt.Sprintf("|%s|", Target[:monkey.highwater+1])})
 	}
 	return results
 }

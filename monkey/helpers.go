@@ -1,7 +1,6 @@
 package monkey
 
 import (
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,7 +24,7 @@ func getSeatCount() (seatCount int) {
 	return
 }
 
-func closeChannelWhenDone(waitgroup *sync.WaitGroup, channel chan Report) {
+func closeChannelWhenDone(waitgroup *sync.WaitGroup, channel chan report) {
 	waitgroup.Wait()
 	close(channel)
 }
@@ -52,54 +51,23 @@ func getTarget(file string) (output string) {
 	return
 }
 
-// NOTE: "seats" is a pointer to the slice because we need to
-// be able to modify the NUMBER of monkeys in the slice, which
-// we couldn't do if it was just a slice full of pointers.
-func processInput(input string, seats []*Monkey, monkeyClient Client) ([]*Monkey, string) {
-	command := strings.Split(input, " ")
-	switch command[0] {
-	case "exit":
-		MoveCursor(0, len(seats)+9)
-		os.Exit(0)
-	case "rename":
-		index := findMonkeyInList(seats, command[1])
-		if index < 0 {
-			return nil, "ERROR: Could not find monkey by that name to rename."
-		}
-		seats[index].Name = command[2]
-		return seats, fmt.Sprintf("Renamed %s to %s.", command[1], command[2])
-	case "new":
-		seats, result := addNewMonkey(command, seats, monkeyClient)
-		return seats, result
-	}
-	return seats, fmt.Sprintf("Unrecognized command: %s", input)
-}
-
-func addNewMonkey(command []string, seats []*Monkey, monkeyClient Client) ([]*Monkey, string) {
+func addNewMonkey(command []string, seats []*monkey, monkeyClient client) ([]*monkey, string) {
 	var name string
 	if len(command) < 2 {
 		name = fmt.Sprintf("Monkey%d", len(seats))
 	} else {
 		name = command[1]
 	}
-	newMonkey := monkeyClient.CreateNew(name, len(seats))
+	newMonkey := monkeyClient.createNew(name, len(seats))
 	seats = append(seats, newMonkey)
 	return seats, fmt.Sprintf("Created new monkey %s", name)
 }
 
-func findMonkeyInList(haystack []*Monkey, needle string) int {
+func findMonkeyInList(haystack []*monkey, needle string) int {
 	for i, monkey := range haystack {
-		if monkey.Name == needle {
+		if monkey.name == needle {
 			return i
 		}
 	}
 	return -1
-}
-
-func getInput(seatCount int, reader *bufio.Reader) string {
-	MoveCursor(20, seatCount+4)
-	text, _ := reader.ReadString('\n')
-	AtCursor(0, seatCount+7, ClearingString())  // clear the last command's status message
-	AtCursor(20, seatCount+4, ClearingString()) // clear the command line for the next command
-	return strings.TrimRight(text, "\n")
 }

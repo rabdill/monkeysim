@@ -7,18 +7,21 @@ import (
 	"sync"
 )
 
+var Seats []*Monkey
+var Target string
+
 func KickOffSim() {
 	seatCount := getSeatCount()
 	ClearScreen(seatCount)
 
 	updates := make(chan Report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}       // how we know when all the monkeys are done
-	seats := []*Monkey{}
-	target := getTarget("target.txt")
+	Seats = []*Monkey{}
+	Target = getTarget("target.txt")
 	speedReports := make(chan SpeedReport, 500) // receiving speed reading from monkeys
 
 	monkeyClient := Client{
-		Target:      target,
+		Target:      Target,
 		Updates:     updates,
 		Done:        toWait,
 		OutputTimer: speedReports,
@@ -27,9 +30,9 @@ func KickOffSim() {
 	go func() {
 		for report := range speedReports {
 			// HACK: ignore updates from monkeys that we don't know about yet
-			if report.ID < len(seats) {
-				seats[report.ID].Speed = report.Speed
-				Results(seats, target)
+			if report.ID < len(Seats) {
+				Seats[report.ID].Speed = report.Speed
+				Results(Seats, Target)
 			}
 		}
 	}()
@@ -42,9 +45,9 @@ func KickOffSim() {
 			Highwater: -1,
 			Profile:   ConstructTypingProfile(),
 		}
-		seats = append(seats, &newMonkey)
+		Seats = append(Seats, &newMonkey)
 
-		go newMonkey.StartTyping(target, updates, toWait, speedReports)
+		go newMonkey.StartTyping(Target, updates, toWait, speedReports)
 		toWait.Add(1)
 	}
 
@@ -53,9 +56,9 @@ func KickOffSim() {
 	go func() {
 		for update := range updates {
 			// HACK: ignore updates from monkeys that we don't know about yet
-			if update.ID < len(seats) {
-				seats[update.ID].Highwater = update.Highwater
-				Results(seats, target)
+			if update.ID < len(Seats) {
+				Seats[update.ID].Highwater = update.Highwater
+				Results(Seats, Target)
 			}
 		}
 	}()
@@ -64,10 +67,19 @@ func KickOffSim() {
 	reader := bufio.NewReader(os.Stdin)
 	var response string
 	for {
-		input := getInput(len(seats), reader)
-		seats, response = processInput(input, seats, monkeyClient)
-		ClearScreen(len(seats))
-		Results(seats, target) // reprint table in case a monkey got renamed
-		AtCursor(0, len(seats)+7, response)
+		input := getInput(len(Seats), reader)
+		Seats, response = processInput(input, Seats, monkeyClient)
+		ClearScreen(len(Seats))
+		Results(Seats, Target) // reprint table in case a monkey got renamed
+		AtCursor(0, len(Seats)+7, response)
 	}
+}
+
+func FetchResults() map[string]string {
+	results := map[string]string{}
+
+	for _, monkey := range Seats {
+		results[monkey.Name] = fmt.Sprintf("|%s|", Target[:monkey.Highwater+1])
+	}
+	return results
 }

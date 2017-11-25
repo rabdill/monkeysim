@@ -1,4 +1,4 @@
-package main
+package monkey
 
 import (
 	"bufio"
@@ -9,9 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/rabdill/monkeysim/monkey"
-	"github.com/rabdill/monkeysim/printer"
 )
 
 func getSeatCount() (seatCount int) {
@@ -28,7 +25,7 @@ func getSeatCount() (seatCount int) {
 	return
 }
 
-func closeChannelWhenDone(waitgroup *sync.WaitGroup, channel chan monkey.Report) {
+func closeChannelWhenDone(waitgroup *sync.WaitGroup, channel chan Report) {
 	waitgroup.Wait()
 	close(channel)
 }
@@ -58,11 +55,11 @@ func getTarget(file string) (output string) {
 // NOTE: "seats" is a pointer to the slice because we need to
 // be able to modify the NUMBER of monkeys in the slice, which
 // we couldn't do if it was just a slice full of pointers.
-func processInput(input string, seats []*monkey.Monkey, monkeyClient monkey.Client) ([]*monkey.Monkey, string) {
+func processInput(input string, seats []*Monkey, monkeyClient Client) ([]*Monkey, string) {
 	command := strings.Split(input, " ")
 	switch command[0] {
 	case "exit":
-		printer.MoveCursor(0, len(seats)+9)
+		MoveCursor(0, len(seats)+9)
 		os.Exit(0)
 	case "rename":
 		index := findMonkeyInList(seats, command[1])
@@ -78,7 +75,7 @@ func processInput(input string, seats []*monkey.Monkey, monkeyClient monkey.Clie
 	return seats, fmt.Sprintf("Unrecognized command: %s", input)
 }
 
-func addNewMonkey(command []string, seats []*monkey.Monkey, monkeyClient monkey.Client) ([]*monkey.Monkey, string) {
+func addNewMonkey(command []string, seats []*Monkey, monkeyClient Client) ([]*Monkey, string) {
 	var name string
 	if len(command) < 2 {
 		name = fmt.Sprintf("Monkey%d", len(seats))
@@ -90,7 +87,7 @@ func addNewMonkey(command []string, seats []*monkey.Monkey, monkeyClient monkey.
 	return seats, fmt.Sprintf("Created new monkey %s", name)
 }
 
-func findMonkeyInList(haystack []*monkey.Monkey, needle string) int {
+func findMonkeyInList(haystack []*Monkey, needle string) int {
 	for i, monkey := range haystack {
 		if monkey.Name == needle {
 			return i
@@ -100,9 +97,9 @@ func findMonkeyInList(haystack []*monkey.Monkey, needle string) int {
 }
 
 func getInput(seatCount int, reader *bufio.Reader) string {
-	printer.MoveCursor(20, seatCount+4)
+	MoveCursor(20, seatCount+4)
 	text, _ := reader.ReadString('\n')
-	printer.AtCursor(0, seatCount+7, printer.ClearingString())  // clear the last command's status message
-	printer.AtCursor(20, seatCount+4, printer.ClearingString()) // clear the command line for the next command
+	AtCursor(0, seatCount+7, ClearingString())  // clear the last command's status message
+	AtCursor(20, seatCount+4, ClearingString()) // clear the command line for the next command
 	return strings.TrimRight(text, "\n")
 }

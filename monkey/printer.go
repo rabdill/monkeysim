@@ -1,13 +1,11 @@
-package printer
+package monkey
 
 import (
 	"fmt"
-
-	"github.com/rabdill/monkeysim/monkey"
 )
 
 // Results - write a table of the monkeys' high scores to the terminal
-func Results(results []*monkey.Monkey, target string) {
+func Results(results []*Monkey, target string) {
 	headerSize := 2 // NOTE: If the header gets longer, this "2" needs to change.
 
 	for i, monkey := range results {

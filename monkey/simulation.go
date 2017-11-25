@@ -75,11 +75,16 @@ func KickOffSim() {
 	}
 }
 
-func FetchResults() map[string]string {
-	results := map[string]string{}
+type Answer struct {
+	Name, Progress string
+}
+
+func FetchResults() []Answer {
+
+	results := []Answer{}
 
 	for _, monkey := range Seats {
-		results[monkey.Name] = fmt.Sprintf("|%s|", Target[:monkey.Highwater+1])
+		results = append(results, Answer{monkey.Name, fmt.Sprintf("|%s|", Target[:monkey.Highwater+1])})
 	}
 	return results
 }

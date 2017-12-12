@@ -14,6 +14,7 @@ func main() {
 	router.Static("/static", "./static")
 
 	router.GET("/info", info)
+	router.GET("/add_monkey", addMonkey)
 
 	go monkey.KickOffSim()
 
@@ -22,4 +23,13 @@ func main() {
 
 func info(c *gin.Context) {
 	c.JSON(http.StatusOK, monkey.FetchResults())
+}
+
+func addMonkey(c *gin.Context) {
+	monkey, err := monkey.AddMonkey()
+	if err != nil {
+		c.JSON(500, err)
+		return
+	}
+	c.JSON(201, monkey)
 }

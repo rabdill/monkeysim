@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-// monkey is the main struct used to keep track of
+// Monkey is the main struct used to keep track of
 // performance and statistics for an individual typist
-type monkey struct {
+type Monkey struct {
 	id        int
 	name      string
 	highwater int
@@ -38,8 +38,8 @@ type client struct {
 }
 
 // createNew spawns a new monkey that's already typing
-func (client client) createNew(name string, id int) *monkey {
-	newMonkey := monkey{
+func (client *client) createNew(name string, id int) *Monkey {
+	newMonkey := Monkey{
 		id:        id,
 		name:      name,
 		highwater: -1,
@@ -47,12 +47,13 @@ func (client client) createNew(name string, id int) *monkey {
 	}
 	go newMonkey.startTyping(client.target, client.updates, client.done, client.outputTimer)
 	client.done.Add(1)
+	Seats = append(Seats, &newMonkey)
 	return &newMonkey
 }
 
 // startTyping is a method that tells a monkey to start simulating
 // key presses.
-func (monkey monkey) startTyping(target string, updates chan report, done *sync.WaitGroup, outputTimer chan speedReport) {
+func (monkey Monkey) startTyping(target string, updates chan report, done *sync.WaitGroup, outputTimer chan speedReport) {
 	defer done.Done()
 	rand.Seed(time.Now().UnixNano() / (int64(monkey.id) + 1)) // has to be `id+1` because we have an id 0
 

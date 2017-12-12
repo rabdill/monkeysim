@@ -50,24 +50,3 @@ func getTarget(file string) (output string) {
 	output = re.ReplaceAllLiteralString(output, "")
 	return
 }
-
-func addNewMonkey(command []string, seats []*monkey, monkeyClient client) ([]*monkey, string) {
-	var name string
-	if len(command) < 2 {
-		name = fmt.Sprintf("Monkey%d", len(seats))
-	} else {
-		name = command[1]
-	}
-	newMonkey := monkeyClient.createNew(name, len(seats))
-	seats = append(seats, newMonkey)
-	return seats, fmt.Sprintf("Created new monkey %s", name)
-}
-
-func findMonkeyInList(haystack []*monkey, needle string) int {
-	for i, monkey := range haystack {
-		if monkey.name == needle {
-			return i
-		}
-	}
-	return -1
-}

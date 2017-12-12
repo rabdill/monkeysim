@@ -6,10 +6,12 @@ import (
 )
 
 // Seats holds the current roster of monkeys and their stats.
-var Seats []*monkey
+var Seats []*Monkey
 
 //Target holds the goal text that the monkeys are working toward.
 var Target string
+
+var monkeyClient client
 
 // KickOffSim starts the simulation and sets the first set of
 // monkeys off to typing.
@@ -18,16 +20,16 @@ func KickOffSim() {
 
 	updates := make(chan report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}       // how we know when all the monkeys are done
-	Seats = []*monkey{}
+	Seats = []*Monkey{}
 	Target = getTarget("target.txt")
 	speedReports := make(chan speedReport, 500) // receiving speed reading from monkeys
 
-	// monkeyClient := client{
-	// 	target:      Target,
-	// 	updates:     updates,
-	// 	done:        toWait,
-	// 	outputTimer: speedReports,
-	// }
+	monkeyClient = client{
+		target:      Target,
+		updates:     updates,
+		done:        toWait,
+		outputTimer: speedReports,
+	}
 	// listen for speed reports
 	go func() {
 		for report := range speedReports {
@@ -42,16 +44,7 @@ func KickOffSim() {
 
 	// send in the monkeys!
 	for i := 0; i < seatCount; i++ {
-		newMonkey := monkey{
-			id:        i,
-			name:      fmt.Sprintf("Monkey%d", i),
-			highwater: -1,
-			profile:   constructTypingProfile(),
-		}
-		Seats = append(Seats, &newMonkey)
-
-		go newMonkey.startTyping(Target, updates, toWait, speedReports)
-		toWait.Add(1)
+		_ = monkeyClient.createNew(fmt.Sprintf("Monkey%d", i), i)
 	}
 
 	go closeChannelWhenDone(toWait, updates)
@@ -74,10 +67,16 @@ type Answer struct {
 	Progress string
 }
 
+// AddMonkey processes user requests to add more monkeys
+func AddMonkey() (*Monkey, error) {
+	i := len(Seats)
+	monkey := monkeyClient.createNew(fmt.Sprintf("Monkey%d", i), i)
+	return monkey, nil
+}
+
 // FetchResults turns the collection of monkey stats into a format
 // that can be read by the HTML templates.
 func FetchResults() []Answer {
-
 	results := []Answer{}
 
 	for _, monkey := range Seats {

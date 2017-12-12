@@ -3,7 +3,7 @@ function get(url) {
         var req = new XMLHttpRequest();
         req.onreadystatechange = function() {
             if(req.readyState == 4) {
-                if(req.status == 200) resolve(req.responseText);
+                if(req.status >= 200 && req.status < 300) resolve(req.responseText);
                 else reject(req);
             }
         }
@@ -28,3 +28,16 @@ function updateMonkeys() {
 };
 
 updateMonkeys();
+
+
+
+var addMonkey = function() {
+    console.log("Adding...");
+    get('/add_monkey').then(function(response) {
+        monkey = JSON.parse(response)
+        console.log("MONKEY ADDED!");
+        console.log(monkey);
+    }, function(err) {
+        console.log("Didn't work: ", err);
+    });
+};

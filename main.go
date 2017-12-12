@@ -9,15 +9,17 @@ import (
 
 func main() {
 	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
+
+	router.StaticFile("/", "./static/index.html")
+	router.Static("/static", "./static")
+
+	router.GET("/info", info)
 
 	go monkey.KickOffSim()
 
-	router.GET("/index", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"a": monkey.FetchResults(),
-		})
-	})
-
 	router.Run() // port 8080
+}
+
+func info(c *gin.Context) {
+	c.JSON(http.StatusOK, monkey.FetchResults())
 }

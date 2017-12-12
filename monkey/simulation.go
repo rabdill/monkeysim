@@ -69,7 +69,9 @@ func KickOffSim() {
 
 // Answer is the minified monkey entry sent to the HTML template.
 type Answer struct {
-	Name, Progress string
+	Name     string
+	Speed    float64
+	Progress string
 }
 
 // FetchResults turns the collection of monkey stats into a format
@@ -79,7 +81,7 @@ func FetchResults() []Answer {
 	results := []Answer{}
 
 	for _, monkey := range Seats {
-		results = append(results, Answer{monkey.name, fmt.Sprintf("|%s|", Target[:monkey.highwater+1])})
+		results = append(results, Answer{monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1])})
 	}
 	return results
 }

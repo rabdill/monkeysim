@@ -19,6 +19,7 @@ func main() {
 	router.GET("/monkeys", allMonkeys)
 	router.POST("/monkeys", addMonkey)
 	router.PATCH("/monkeys/:id/stand", stand)
+	router.PATCH("/monkeys/:id/sit", sit)
 
 	go monkey.KickOffSim()
 
@@ -49,7 +50,22 @@ func stand(c *gin.Context) {
 		return
 	}
 
-	err = monkey.StandUp(id)
+	err = monkey.Stand(id)
+	if err != nil {
+		c.JSON(500, err)
+		return
+	}
+	c.Status(202)
+}
+
+func sit(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(500, err)
+		return
+	}
+
+	err = monkey.Sit(id)
 	if err != nil {
 		c.JSON(500, err)
 		return

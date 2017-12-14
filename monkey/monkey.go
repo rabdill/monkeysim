@@ -96,8 +96,8 @@ func (monkey *Monkey) startTyping(target string, updates chan report, done *sync
 	close(timer) // don't keep listening to speed reports once the monkey stops typing
 }
 
-func (monkey *Monkey) standUp() error {
-	for i := 0; i < len(seats); i++ { // so they show up in order
+func (monkey *Monkey) stand() error {
+	for i := 0; i < len(seats); i++ {
 		if seats[i].monkey == monkey {
 			seats[i] = seat{
 				keyboard: seats[i].keyboard,
@@ -107,6 +107,20 @@ func (monkey *Monkey) standUp() error {
 		}
 	}
 	monkey.seated = false
+	return nil
+}
+
+func (monkey *Monkey) sit() error {
+	for i := 0; i < len(seats); i++ {
+		if seats[i].monkey == nil {
+			seats[i] = seat{
+				keyboard: seats[i].keyboard,
+				monkey:   monkey,
+			}
+			break
+		}
+	}
+	monkey.seated = true
 	return nil
 }
 

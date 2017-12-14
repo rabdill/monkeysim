@@ -69,9 +69,15 @@ func AddMonkey() (*Monkey, error) {
 	return monkey, nil
 }
 
-// StandUp processes user requests to get a monkey out of its seat
-func StandUp(id int) (err error) {
-	err = Bullpen[id].standUp()
+// Stand processes user requests to get a monkey out of its seat
+func Stand(id int) (err error) {
+	err = Bullpen[id].stand()
+	return
+}
+
+// Sit processes user requests to get a monkey out of its seat
+func Sit(id int) (err error) {
+	err = Bullpen[id].sit()
 	return
 }
 

@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 // getSeatCount pulls the command line parameter for how many monkeys we
@@ -24,11 +23,6 @@ func getSeatCount() (seatCount int) {
 		seatCount = 1
 	}
 	return
-}
-
-func closeChannelWhenDone(waitgroup *sync.WaitGroup, channel chan report) {
-	waitgroup.Wait()
-	close(channel)
 }
 
 // processTarget - Turns file contents into a string containing only a-z characters

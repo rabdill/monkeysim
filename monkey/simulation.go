@@ -2,7 +2,6 @@ package monkey
 
 import (
 	"fmt"
-	"sync"
 )
 
 // Bullpen holds the current roster of monkeys and their stats.
@@ -18,14 +17,12 @@ var monkeyClient client
 func KickOffSim() {
 	seatCount := getSeatCount()
 	seats = make(map[int]seat)
-	toWait := &sync.WaitGroup{} // how we know when all the monkeys are done
 	Bullpen = []*Monkey{}
 	Target = getTarget("target.txt")
 	speedReports := make(chan speedReport, 500) // receiving speed reading from monkeys
 
 	monkeyClient = client{
 		target:      Target,
-		done:        toWait,
 		outputTimer: speedReports,
 	}
 	// listen for speed reports

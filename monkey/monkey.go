@@ -2,7 +2,6 @@ package monkey
 
 import (
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -33,7 +32,6 @@ type speedReport struct {
 // client is used for storing parameters we need to make a new monkey
 type client struct {
 	target      string
-	done        *sync.WaitGroup
 	outputTimer chan speedReport
 }
 
@@ -53,16 +51,14 @@ func (client *client) createNew(name string, id int) *Monkey {
 		profile:   constructTypingProfile(),
 		seated:    true,
 	}
-	go newMonkey.startTyping(client.target, client.done, client.outputTimer)
-	client.done.Add(1)
+	go newMonkey.startTyping(client.target, client.outputTimer)
 	Bullpen = append(Bullpen, &newMonkey)
 	return &newMonkey
 }
 
 // startTyping is a method that tells a monkey to start simulating
 // key presses.
-func (monkey *Monkey) startTyping(target string, done *sync.WaitGroup, outputTimer chan speedReport) {
-	defer done.Done()
+func (monkey *Monkey) startTyping(target string, outputTimer chan speedReport) {
 	rand.Seed(time.Now().UnixNano() / (int64(monkey.id) + 1)) // has to be `id+1` because we have an id 0
 
 	possibilities := convertTypingProfile(monkey.profile)

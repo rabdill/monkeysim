@@ -5,8 +5,8 @@ import (
 	"sync"
 )
 
-// Seats holds the current roster of monkeys and their stats.
-var Seats []*Monkey
+// Bullpen holds the current roster of monkeys and their stats.
+var Bullpen []*Monkey
 
 //Target holds the goal text that the monkeys are working toward.
 var Target string
@@ -17,10 +17,10 @@ var monkeyClient client
 // monkeys off to typing.
 func KickOffSim() {
 	seatCount := getSeatCount()
-
+	seats = make(map[int]seat)
 	updates := make(chan report, 100) // how monkeys check in with us
 	toWait := &sync.WaitGroup{}       // how we know when all the monkeys are done
-	Seats = []*Monkey{}
+	Bullpen = []*Monkey{}
 	Target = getTarget("target.txt")
 	speedReports := make(chan speedReport, 500) // receiving speed reading from monkeys
 
@@ -34,17 +34,19 @@ func KickOffSim() {
 	go func() {
 		for report := range speedReports {
 			// HACK: ignore updates from monkeys that we don't know about yet
-			// *tk when would this happen?!
-			if report.id < len(Seats) {
-				Seats[report.id].speed = report.speed
-				// *update screen
+			if report.id < len(Bullpen) {
+				Bullpen[report.id].speed = report.speed
 			}
 		}
 	}()
 
 	// send in the monkeys!
 	for i := 0; i < seatCount; i++ {
-		_ = monkeyClient.createNew(fmt.Sprintf("Monkey%d", i), i)
+		newMonkey := monkeyClient.createNew(fmt.Sprintf("Monkey%d", i), i)
+		seats[i] = seat{ // (The sim starts with all seats filled with monkeys)
+			keyboard: "standard",
+			monkey:   newMonkey,
+		}
 	}
 
 	go closeChannelWhenDone(toWait, updates)
@@ -52,8 +54,8 @@ func KickOffSim() {
 	go func() {
 		for update := range updates {
 			// HACK: ignore updates from monkeys that we don't know about yet
-			if update.id < len(Seats) {
-				Seats[update.id].highwater = update.highwater
+			if update.id < len(Bullpen) {
+				Bullpen[update.id].highwater = update.highwater
 				// *update screen
 			}
 		}
@@ -62,13 +64,14 @@ func KickOffSim() {
 
 // AddMonkey processes user requests to add more monkeys
 func AddMonkey() (*Monkey, error) {
-	i := len(Seats)
+	i := len(Bullpen)
 	monkey := monkeyClient.createNew(fmt.Sprintf("Monkey%d", i), i)
 	return monkey, nil
 }
 
 // Answer is the minified monkey entry sent to the HTML template.
 type Answer struct {
+	Seat     int
 	Name     string
 	Speed    float64
 	Progress string
@@ -79,8 +82,9 @@ type Answer struct {
 func FetchResults() []Answer {
 	results := []Answer{}
 
-	for _, monkey := range Seats {
-		results = append(results, Answer{monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1])})
+	for i := 0; i < len(seats); i++ { // so they show up in order
+		monkey := seats[i].monkey
+		results = append(results, Answer{i, monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1])})
 	}
 	return results
 }

@@ -17,7 +17,7 @@ function updateMonkeys() {
         monkeys = JSON.parse(response)
         guts = "";
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
-            guts += "<li><strong>" + monkey.Name + "</strong> (" + monkey.Speed.toFixed(3) + " kkps): " + monkey.Progress;
+            guts += "<li>Seat " + monkey.Seat + ": <strong>" + monkey.Name + "</strong> (" + monkey.Speed.toFixed(3) + " kkps): " + monkey.Progress;
         }
         document.getElementById("results").innerHTML = guts;
 
@@ -31,7 +31,7 @@ updateMonkeys();
 
 
 
-var addMonkey = function() {
+var addSeat = function() {
     console.log("Adding...");
     req('/monkeys', "POST").then(function(response) {
         monkey = JSON.parse(response)

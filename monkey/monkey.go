@@ -37,6 +37,13 @@ type client struct {
 	outputTimer chan speedReport
 }
 
+type seat struct {
+	keyboard string
+	monkey   *Monkey
+}
+
+var seats map[int]seat // keeping track of who's sitting where
+
 // createNew spawns a new monkey that's already typing
 func (client *client) createNew(name string, id int) *Monkey {
 	newMonkey := Monkey{
@@ -47,7 +54,7 @@ func (client *client) createNew(name string, id int) *Monkey {
 	}
 	go newMonkey.startTyping(client.target, client.updates, client.done, client.outputTimer)
 	client.done.Add(1)
-	Seats = append(Seats, &newMonkey)
+	Bullpen = append(Bullpen, &newMonkey)
 	return &newMonkey
 }
 

@@ -10,6 +10,8 @@ import (
 	"sync"
 )
 
+// getSeatCount pulls the command line parameter for how many monkeys we
+// should start with
 func getSeatCount() (seatCount int) {
 	var err error
 	if len(os.Args) > 1 {

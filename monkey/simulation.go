@@ -82,6 +82,7 @@ type Answer struct {
 	Name     string
 	Speed    float64
 	Progress string
+	Seated   bool
 }
 
 // FetchResults turns the collection of monkey stats into a format
@@ -94,7 +95,24 @@ func FetchResults() []Answer {
 		if monkey == nil {
 			results = append(results, Answer{Seat: i})
 		} else {
-			results = append(results, Answer{i, monkey.id, monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1])})
+			results = append(results, Answer{i, monkey.id, monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1]), monkey.seated})
+		}
+
+	}
+	return results
+}
+
+// FetchAll turns the collection of monkey stats into a format
+// that can be read by the HTML templates.
+func FetchAll() []Answer {
+	results := []Answer{}
+
+	for i := 0; i < len(Bullpen); i++ { // so they show up in order
+		monkey := Bullpen[i]
+		if monkey == nil {
+			results = append(results, Answer{Seat: i})
+		} else {
+			results = append(results, Answer{i, monkey.id, monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1]), monkey.seated})
 		}
 
 	}

@@ -14,9 +14,10 @@ func main() {
 	router.StaticFile("/", "./static/index.html")
 	router.Static("/static", "./static")
 
-	router.GET("/monkeys", info)
-	router.POST("/monkeys", addMonkey)
+	router.GET("/seats", seatedMonkeys)
 
+	router.GET("/monkeys", allMonkeys)
+	router.POST("/monkeys", addMonkey)
 	router.PATCH("/monkeys/:id/stand", stand)
 
 	go monkey.KickOffSim()
@@ -24,8 +25,12 @@ func main() {
 	router.Run() // port 8080
 }
 
-func info(c *gin.Context) {
+func seatedMonkeys(c *gin.Context) {
 	c.JSON(http.StatusOK, monkey.FetchResults())
+}
+
+func allMonkeys(c *gin.Context) {
+	c.JSON(http.StatusOK, monkey.FetchAll())
 }
 
 func addMonkey(c *gin.Context) {

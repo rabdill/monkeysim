@@ -18,15 +18,13 @@ var monkeyClient client
 func KickOffSim() {
 	seatCount := getSeatCount()
 	seats = make(map[int]seat)
-	updates := make(chan report, 100) // how monkeys check in with us
-	toWait := &sync.WaitGroup{}       // how we know when all the monkeys are done
+	toWait := &sync.WaitGroup{} // how we know when all the monkeys are done
 	Bullpen = []*Monkey{}
 	Target = getTarget("target.txt")
 	speedReports := make(chan speedReport, 500) // receiving speed reading from monkeys
 
 	monkeyClient = client{
 		target:      Target,
-		updates:     updates,
 		done:        toWait,
 		outputTimer: speedReports,
 	}
@@ -48,18 +46,6 @@ func KickOffSim() {
 			monkey:   newMonkey,
 		}
 	}
-
-	go closeChannelWhenDone(toWait, updates)
-	// listen for updates
-	go func() {
-		for update := range updates {
-			// HACK: ignore updates from monkeys that we don't know about yet
-			if update.id < len(Bullpen) {
-				Bullpen[update.id].highwater = update.highwater
-				// *update screen
-			}
-		}
-	}()
 }
 
 // AddMonkey processes user requests to add more monkeys

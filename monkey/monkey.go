@@ -33,7 +33,6 @@ type speedReport struct {
 // client is used for storing parameters we need to make a new monkey
 type client struct {
 	target      string
-	updates     chan report
 	done        *sync.WaitGroup
 	outputTimer chan speedReport
 }
@@ -54,7 +53,7 @@ func (client *client) createNew(name string, id int) *Monkey {
 		profile:   constructTypingProfile(),
 		seated:    true,
 	}
-	go newMonkey.startTyping(client.target, client.updates, client.done, client.outputTimer)
+	go newMonkey.startTyping(client.target, client.done, client.outputTimer)
 	client.done.Add(1)
 	Bullpen = append(Bullpen, &newMonkey)
 	return &newMonkey
@@ -62,7 +61,7 @@ func (client *client) createNew(name string, id int) *Monkey {
 
 // startTyping is a method that tells a monkey to start simulating
 // key presses.
-func (monkey *Monkey) startTyping(target string, updates chan report, done *sync.WaitGroup, outputTimer chan speedReport) {
+func (monkey *Monkey) startTyping(target string, done *sync.WaitGroup, outputTimer chan speedReport) {
 	defer done.Done()
 	rand.Seed(time.Now().UnixNano() / (int64(monkey.id) + 1)) // has to be `id+1` because we have an id 0
 
@@ -71,7 +70,6 @@ func (monkey *Monkey) startTyping(target string, updates chan report, done *sync
 	timer := make(chan int, 1000)
 
 	currentSearch := 0
-	highwater := -1
 	tickLevel := 10000000
 
 	go typingRate(timer, monkey.id, outputTimer) // speedReports sent straight to monitoring process
@@ -79,9 +77,8 @@ func (monkey *Monkey) startTyping(target string, updates chan report, done *sync
 	for i := 0; monkey.seated; i++ {
 		keyPress := possibilities[rand.Intn(len(possibilities))]
 		if keyPress == target[currentSearch] {
-			if currentSearch > highwater {
-				highwater = currentSearch
-				updates <- report{monkey.id, highwater}
+			if currentSearch > monkey.highwater {
+				monkey.highwater = currentSearch
 			}
 			currentSearch++
 			continue

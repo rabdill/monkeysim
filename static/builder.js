@@ -17,7 +17,7 @@ function updateMonkeys() {
         monkeys = JSON.parse(response)
         guts = "";
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
-            guts += "<li>Seat " + monkey.Seat + ": <strong>" + monkey.Name + "</strong> (" + monkey.Speed.toFixed(3) + " kkps): " + monkey.Progress;
+            guts += `<li><button onclick="standUp(` + monkey.Seat + `)">stand</button>Seat ` + monkey.Seat + ": <strong>" + monkey.Name + "</strong> (" + monkey.Speed.toFixed(3) + " kkps): " + monkey.Progress;
         }
         document.getElementById("results").innerHTML = guts;
 
@@ -27,9 +27,15 @@ function updateMonkeys() {
     });
 };
 
-updateMonkeys();
-
-
+var standUp = function(id) {
+    console.log("Telling monkey " + id + " to stand up.");
+    path = "/monkeys/" + id + "/stand"
+    req(path, "PATCH").then(function(response) {
+        console.log("MONKEY STOOD!");
+    }, function(err) {
+        console.log("Didn't work: ", err);
+    });
+}
 
 var addSeat = function() {
     console.log("Adding...");
@@ -41,3 +47,5 @@ var addSeat = function() {
         console.log("Didn't work: ", err);
     });
 };
+
+updateMonkeys();

@@ -96,6 +96,20 @@ func (monkey *Monkey) startTyping(target string, updates chan report, done *sync
 	close(timer) // don't keep listening to speed reports once the monkey stops typing
 }
 
+func (monkey *Monkey) standUp() error {
+	for i := 0; i < len(seats); i++ { // so they show up in order
+		if seats[i].monkey == monkey {
+			seats[i] = seat{
+				keyboard: seats[i].keyboard,
+				monkey:   nil,
+			}
+			break
+		}
+	}
+	monkey.seated = false
+	return nil
+}
+
 // typingRate accepts an input channel to which a monkey sends a
 // "tick" once every 1,000 key presses. The function then determines
 // that monkey's typing speed and generates a report that's sent

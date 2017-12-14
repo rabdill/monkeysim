@@ -69,9 +69,16 @@ func AddMonkey() (*Monkey, error) {
 	return monkey, nil
 }
 
+// StandUp processes user requests to get a monkey out of its seat
+func StandUp(id int) (err error) {
+	err = Bullpen[id].standUp()
+	return
+}
+
 // Answer is the minified monkey entry sent to the HTML template.
 type Answer struct {
 	Seat     int
+	ID       int
 	Name     string
 	Speed    float64
 	Progress string
@@ -84,7 +91,12 @@ func FetchResults() []Answer {
 
 	for i := 0; i < len(seats); i++ { // so they show up in order
 		monkey := seats[i].monkey
-		results = append(results, Answer{i, monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1])})
+		if monkey == nil {
+			results = append(results, Answer{Seat: i})
+		} else {
+			results = append(results, Answer{i, monkey.id, monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1])})
+		}
+
 	}
 	return results
 }

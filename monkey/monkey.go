@@ -14,6 +14,7 @@ type Monkey struct {
 	speed     float64
 	profile   map[string]int
 	seated    bool
+	client    *client
 }
 
 // report is the format of the updates monkeys send to
@@ -50,29 +51,27 @@ func (client *client) createNew(name string, id int) *Monkey {
 		highwater: -1,
 		profile:   constructTypingProfile(),
 		seated:    true,
+		client:    client,
 	}
-	go newMonkey.startTyping(client.target, client.outputTimer)
+	go newMonkey.startTyping()
 	Bullpen = append(Bullpen, &newMonkey)
 	return &newMonkey
 }
 
 // startTyping is a method that tells a monkey to start simulating
 // key presses.
-func (monkey *Monkey) startTyping(target string, outputTimer chan speedReport) {
+func (monkey *Monkey) startTyping() {
 	rand.Seed(time.Now().UnixNano() / (int64(monkey.id) + 1)) // has to be `id+1` because we have an id 0
-
 	possibilities := convertTypingProfile(monkey.profile)
-
 	timer := make(chan int, 1000)
-
 	currentSearch := 0
 	tickLevel := 10000000
 
-	go typingRate(timer, monkey.id, outputTimer) // speedReports sent straight to monitoring process
+	go typingRate(timer, monkey.id, monkey.client.outputTimer) // speedReports sent straight to monitoring process
 
 	for i := 0; monkey.seated; i++ {
 		keyPress := possibilities[rand.Intn(len(possibilities))]
-		if keyPress == target[currentSearch] {
+		if keyPress == monkey.client.target[currentSearch] {
 			if currentSearch > monkey.highwater {
 				monkey.highwater = currentSearch
 			}
@@ -114,6 +113,7 @@ func (monkey *Monkey) sit() error {
 		}
 	}
 	monkey.seated = true
+	monkey.startTyping()
 	return nil
 }
 

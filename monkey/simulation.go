@@ -60,18 +60,18 @@ func KickOffSim() {
 	}()
 }
 
-// Answer is the minified monkey entry sent to the HTML template.
-type Answer struct {
-	Name     string
-	Speed    float64
-	Progress string
-}
-
 // AddMonkey processes user requests to add more monkeys
 func AddMonkey() (*Monkey, error) {
 	i := len(Seats)
 	monkey := monkeyClient.createNew(fmt.Sprintf("Monkey%d", i), i)
 	return monkey, nil
+}
+
+// Answer is the minified monkey entry sent to the HTML template.
+type Answer struct {
+	Name     string
+	Speed    float64
+	Progress string
 }
 
 // FetchResults turns the collection of monkey stats into a format

@@ -1,4 +1,4 @@
-function get(url) {
+function req(url, method="GET") {
     return new Promise(function(resolve, reject) {
         var req = new XMLHttpRequest();
         req.onreadystatechange = function() {
@@ -7,13 +7,13 @@ function get(url) {
                 else reject(req);
             }
         }
-        req.open("GET", url, true);            
+        req.open(method, url, true);            
         req.send(null);
     });
 };
 
 function updateMonkeys() {
-    get('/info').then(function(response) {
+    req('/monkeys').then(function(response) {
         monkeys = JSON.parse(response)
         guts = "";
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
@@ -33,7 +33,7 @@ updateMonkeys();
 
 var addMonkey = function() {
     console.log("Adding...");
-    get('/add_monkey').then(function(response) {
+    req('/monkeys', "POST").then(function(response) {
         monkey = JSON.parse(response)
         console.log("MONKEY ADDED!");
         console.log(monkey);

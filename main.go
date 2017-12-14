@@ -13,8 +13,8 @@ func main() {
 	router.StaticFile("/", "./static/index.html")
 	router.Static("/static", "./static")
 
-	router.GET("/info", info)
-	router.GET("/add_monkey", addMonkey)
+	router.GET("/monkeys", info)
+	router.POST("/monkeys", addMonkey)
 
 	go monkey.KickOffSim()
 

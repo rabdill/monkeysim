@@ -76,9 +76,9 @@ var addMonkey = function() {
     });
 };
 
-var addSeat = function() {
+var addSeat = function(layout) {
     console.log("Adding seat...");
-    req('/seats', "POST", `{"Layout": "qwerty"}`).then(function(response) {
+    req('/seats', "POST", `{"Layout": "` + layout + `"}`).then(function(response) {
         monkey = JSON.parse(response)
         console.log("SEAT ADDED!");
         console.log(monkey);

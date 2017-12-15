@@ -56,7 +56,6 @@ func AddMonkey() (*Monkey, error) {
 
 // AddSeat processes user requests to add another seat
 func AddSeat(input AddSeatInput) (seat, error) {
-	fmt.Printf("\nReceived seat: %+v\n", input)
 	newSeat := seat{layout: input.Layout}
 	seats[len(seats)] = newSeat
 	return newSeat, nil

@@ -119,7 +119,6 @@ func (monkey *Monkey) sit() error {
 			break
 		}
 	}
-	fmt.Printf("SEATS:\n%+v\n--------\n", seats)
 	monkey.seated = true
 	monkey.startTyping(i)
 	return nil

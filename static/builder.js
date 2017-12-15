@@ -1,4 +1,4 @@
-function req(url, method="GET") {
+function req(url, method="GET", body="") {
     return new Promise(function(resolve, reject) {
         var req = new XMLHttpRequest();
         req.onreadystatechange = function() {
@@ -8,7 +8,7 @@ function req(url, method="GET") {
             }
         }
         req.open(method, url, true);            
-        req.send(null);
+        req.send(body);
     });
 };
 
@@ -35,7 +35,6 @@ function getSeatedMonkeys() {
 function getBullpen() { // monkeys not currently typing
     req('/monkeys').then(function(response) {
         monkeys = JSON.parse(response)
-        console.log(monkeys)
         guts = "";
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
             if(!monkey.Seated) guts += `<li><button onclick="sit(` + monkey.ID + `)">sit</button><strong>` + monkey.Name + `</strong>: ` + monkey.Progress;
@@ -47,7 +46,7 @@ function getBullpen() { // monkeys not currently typing
 }
 
 var stand = function(id) {
-    console.log(`Telling monkey ` + id + ` to stand up.`);
+    console.log(`Telling monkey in seat ` + id + ` to stand up.`);
     path = "/monkeys/" + id + "/stand"
     req(path, "PATCH").then(function(response) {
         console.log("MONKEY STOOD!");
@@ -67,10 +66,21 @@ var sit = function(id) {
 };
 
 var addMonkey = function() {
-    console.log("Adding...");
+    console.log("Adding monkey...");
     req('/monkeys', "POST").then(function(response) {
         monkey = JSON.parse(response)
         console.log("MONKEY ADDED!");
+        console.log(monkey);
+    }, function(err) {
+        console.log("Didn't work: ", err);
+    });
+};
+
+var addSeat = function() {
+    console.log("Adding seat...");
+    req('/seats', "POST", `{"Layout": "qwerty"}`).then(function(response) {
+        monkey = JSON.parse(response)
+        console.log("SEAT ADDED!");
         console.log(monkey);
     }, function(err) {
         console.log("Didn't work: ", err);

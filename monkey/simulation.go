@@ -47,11 +47,19 @@ func KickOffSim() {
 	}
 }
 
-// AddMonkey processes user requests to add more monkeys
+// AddMonkey processes user requests to add another monkey
 func AddMonkey() (*Monkey, error) {
 	i := len(Bullpen)
 	monkey := monkeyClient.createNew(fmt.Sprintf("Monkey%d", i), i)
 	return monkey, nil
+}
+
+// AddSeat processes user requests to add another seat
+func AddSeat(input AddSeatInput) (seat, error) {
+	fmt.Printf("\nReceived seat: %+v\n", input)
+	newSeat := seat{layout: input.Layout}
+	seats[len(seats)] = newSeat
+	return newSeat, nil
 }
 
 // Stand processes user requests to get a monkey out of its seat

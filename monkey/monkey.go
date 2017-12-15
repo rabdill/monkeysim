@@ -1,6 +1,7 @@
 package monkey
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -15,6 +16,12 @@ type Monkey struct {
 	profile   []int
 	seated    bool
 	client    *client
+}
+
+// AddSeatInput is the information sent from a client requesting
+// to add a new, empty seat for a monkey
+type AddSeatInput struct {
+	Layout string
 }
 
 // report is the format of the updates monkeys send to
@@ -112,6 +119,7 @@ func (monkey *Monkey) sit() error {
 			break
 		}
 	}
+	fmt.Printf("SEATS:\n%+v\n--------\n", seats)
 	monkey.seated = true
 	monkey.startTyping(i)
 	return nil
@@ -152,7 +160,7 @@ func convertTypingProfile(profile []int, layout string) string {
 		"dvorak":  "pyfgcrlaoeuidhtnsqjkxbmwvz ",
 		"colemak": "qwfpgjluyarstdhneiozxcvbkm ",
 	}
-
+	fmt.Printf("\n\nKEYBOARD: |%v|\n|||%v||||\n\n", layout, keyboards[layout])
 	for i := 0; i < 27; i++ {
 		for j := 0; j < profile[i]; j++ {
 			answer = answer + string(keyboards[layout][i])

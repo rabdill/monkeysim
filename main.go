@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -15,6 +16,7 @@ func main() {
 	router.Static("/static", "./static")
 
 	router.GET("/seats", seatedMonkeys)
+	router.POST("/seats", addSeat)
 
 	router.GET("/monkeys", allMonkeys)
 	router.POST("/monkeys", addMonkey)
@@ -41,6 +43,22 @@ func addMonkey(c *gin.Context) {
 		return
 	}
 	c.JSON(201, monkey)
+}
+
+func addSeat(c *gin.Context) {
+	var json monkey.AddSeatInput
+	if err := c.ShouldBindJSON(&json); err != nil {
+		fmt.Printf("\nERROR IN HERE 1 : %v", err)
+		c.JSON(400, err.Error())
+		return
+	}
+	seat, err := monkey.AddSeat(json)
+	if err != nil {
+		fmt.Printf("\nERROR IN HERE 2 : %v", err)
+		c.JSON(500, err.Error())
+		return
+	}
+	c.JSON(201, seat)
 }
 
 func stand(c *gin.Context) {

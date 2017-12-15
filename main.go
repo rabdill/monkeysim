@@ -17,10 +17,11 @@ func main() {
 
 	router.GET("/seats", seatedMonkeys)
 	router.POST("/seats", addSeat)
+	router.PATCH("/seats/:id/stand", stand) // You tell a seat to stand, but a monkey to sit
 
 	router.GET("/monkeys", allMonkeys)
 	router.POST("/monkeys", addMonkey)
-	router.PATCH("/monkeys/:id/stand", stand)
+
 	router.PATCH("/monkeys/:id/sit", sit)
 
 	go monkey.KickOffSim()

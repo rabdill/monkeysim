@@ -47,7 +47,7 @@ function getBullpen() { // monkeys not currently typing
 
 var stand = function(id) {
     console.log(`Telling monkey in seat ` + id + ` to stand up.`);
-    path = "/monkeys/" + id + "/stand"
+    path = "/seats/" + id + "/stand"
     req(path, "PATCH").then(function(response) {
         console.log("MONKEY STOOD!");
     }, function(err) {

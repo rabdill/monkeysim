@@ -64,7 +64,7 @@ func AddSeat(input AddSeatInput) (seat, error) {
 
 // Stand processes user requests to get a monkey out of its seat
 func Stand(id int) (err error) {
-	err = Bullpen[id].stand()
+	err = seats[id].monkey.stand()
 	return
 }
 

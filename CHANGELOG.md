@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/rabdill/monkeysim/compare/v0.2.0...HEAD)
 - Monkeys can be removed from their seats
+- Seats have permanent keyboards at them, with varying layouts
+- New monkeys are put into a "bullpen" rather than creating a new chair for them
 
 ## 0.2.0 - 2017-12-12
 - **Converted command-line interface into web UI**

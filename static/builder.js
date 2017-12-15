@@ -66,7 +66,7 @@ var sit = function(id) {
     });
 };
 
-var addSeat = function() {
+var addMonkey = function() {
     console.log("Adding...");
     req('/monkeys', "POST").then(function(response) {
         monkey = JSON.parse(response)

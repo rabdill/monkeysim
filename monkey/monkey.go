@@ -1,7 +1,6 @@
 package monkey
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -38,8 +37,8 @@ type client struct {
 }
 
 type seat struct {
-	keyboard string
-	monkey   *Monkey
+	layout string
+	monkey *Monkey
 }
 
 var seats map[int]seat // keeping track of who's sitting where
@@ -51,19 +50,18 @@ func (client *client) createNew(name string, id int) *Monkey {
 		name:      name,
 		highwater: -1,
 		profile:   constructTypingProfile(),
-		seated:    true,
+		seated:    false,
 		client:    client,
 	}
-	go newMonkey.startTyping()
 	Bullpen = append(Bullpen, &newMonkey)
 	return &newMonkey
 }
 
 // startTyping is a method that tells a monkey to start simulating
 // key presses.
-func (monkey *Monkey) startTyping() {
+func (monkey *Monkey) startTyping(seat int) {
 	rand.Seed(time.Now().UnixNano() / (int64(monkey.id) + 1)) // has to be `id+1` because we have an id 0
-	possibilities := convertTypingProfile(monkey.profile, "qwerty")
+	possibilities := convertTypingProfile(monkey.profile, seats[seat].layout)
 	timer := make(chan int, 1000)
 	currentSearch := 0
 	tickLevel := 10000000
@@ -93,8 +91,8 @@ func (monkey *Monkey) stand() error {
 	for i := 0; i < len(seats); i++ {
 		if seats[i].monkey == monkey {
 			seats[i] = seat{
-				keyboard: seats[i].keyboard,
-				monkey:   nil,
+				layout: seats[i].layout,
+				monkey: nil,
 			}
 			break
 		}
@@ -104,17 +102,18 @@ func (monkey *Monkey) stand() error {
 }
 
 func (monkey *Monkey) sit() error {
-	for i := 0; i < len(seats); i++ {
+	var i int
+	for i = 0; i < len(seats); i++ {
 		if seats[i].monkey == nil {
 			seats[i] = seat{
-				keyboard: seats[i].keyboard,
-				monkey:   monkey,
+				layout: seats[i].layout,
+				monkey: monkey,
 			}
 			break
 		}
 	}
 	monkey.seated = true
-	monkey.startTyping()
+	monkey.startTyping(i)
 	return nil
 }
 
@@ -159,6 +158,5 @@ func convertTypingProfile(profile []int, layout string) string {
 			answer = answer + string(keyboards[layout][i])
 		}
 	}
-	fmt.Println(answer)
 	return answer
 }

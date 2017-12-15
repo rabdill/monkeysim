@@ -39,9 +39,11 @@ func KickOffSim() {
 	for i := 0; i < seatCount; i++ {
 		newMonkey := monkeyClient.createNew(fmt.Sprintf("Monkey%d", i), i)
 		seats[i] = seat{ // (The sim starts with all seats filled with monkeys)
-			keyboard: "standard",
-			monkey:   newMonkey,
+			layout: "qwerty",
+			monkey: newMonkey,
 		}
+		newMonkey.seated = true
+		go newMonkey.startTyping(i)
 	}
 }
 

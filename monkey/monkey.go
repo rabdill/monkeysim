@@ -70,7 +70,7 @@ func (monkey *Monkey) startTyping(seat int) {
 	possibilities := convertTypingProfile(monkey.profile, seats[seat].layout)
 	timer := make(chan int, 1000)
 	currentSearch := 0
-	tickLevel := 10000000
+	tickLevel := 1000 * 1000
 
 	go typingRate(timer, monkey.id, monkey.client.outputTimer) // speedReports sent straight to monitoring process
 
@@ -124,7 +124,7 @@ func (monkey *Monkey) sit() error {
 }
 
 // typingRate accepts an input channel to which a monkey sends a
-// "tick" once every 1,000 key presses. The function then determines
+// "tick" once every million key presses. The function then determines
 // that monkey's typing speed and generates a report that's sent
 // back to the parent process.
 func typingRate(tick chan int, id int, output chan speedReport) {
@@ -133,6 +133,10 @@ func typingRate(tick chan int, id int, output chan speedReport) {
 		end := time.Now()
 		elapsed := end.Sub(start)
 		start = time.Now()
+		// We divide by 1,000 here to get a more readable number. We COULD
+		// do the same thing by multiplying the "tickLevel" by 1000, but that
+		// means getting updates 1,000 times less often. This does the same thing
+		// but updates faster.
 		output <- speedReport{id, float64(message) / (elapsed.Seconds() * 1000)}
 	}
 }

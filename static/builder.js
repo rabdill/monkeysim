@@ -20,7 +20,7 @@ function updateMonkeys() {
 function getSeatedMonkeys() {
     req('/seats').then(function(response) {
         monkeys = JSON.parse(response)
-        guts = `<table border="1" cellpadding="10"><thead><th><th>Seat<th>Keyboard<th>Monkey<th>Speed<th>Progress</thead><tbody>`;
+        guts = `<table border="1" cellpadding="10"><thead><th><th>Seat<th>Keyboard<th>Monkey<th>Speed*<th>Progress</thead><tbody>`;
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
             guts += `<tr><td><button onclick="stand(` + monkey.Seat + `)">stand</button><td>` + monkey.Seat + `<td> ` + monkey.Keyboard + `<td><strong>` + monkey.Name + `</strong><td>` + monkey.Speed.toFixed(3) + `<td>` + monkey.Progress;
         }

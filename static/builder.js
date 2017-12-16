@@ -1,3 +1,5 @@
+var updateDelay = 1000; // how frequently the UI calls home
+
 function req(url, method="GET", body="") {
     return new Promise(function(resolve, reject) {
         var req = new XMLHttpRequest();
@@ -20,14 +22,25 @@ function updateMonkeys() {
 function getSeatedMonkeys() {
     req('/seats').then(function(response) {
         monkeys = JSON.parse(response)
-        guts = `<table border="1" cellpadding="10"><thead><th><th>Seat<th>Keyboard<th>Monkey<th>Speed*<th>Progress</thead><tbody>`;
+        console.log(monkeys);
+        guts = ``;
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
-            guts += `<tr><td><button onclick="stand(` + monkey.Seat + `)">stand</button><td>` + monkey.Seat + `<td> ` + monkey.Keyboard + `<td><strong>` + monkey.Name + `</strong><td>` + monkey.Speed.toFixed(3) + `<td>` + monkey.Progress;
+            guts += `<tr><td>` + monkey.Seat + `<td> ` + monkey.Keyboard + `<td>`;
+            if(monkey.Name) {
+                guts += `<button class="btn btn-warning" onclick="stand(` + monkey.Seat + `)">` + monkey.Name + `</button>`;
+            }
+            
+            guts += `</strong><td>`;
+            
+            if(monkey.Name) {
+                guts += monkey.Speed.toFixed(3);
+            }
+            guts += `<td>` + monkey.Progress;
         }
         guts += "</table>"
         document.getElementById("results").innerHTML = guts;
 
-        setTimeout(updateMonkeys, 2000);
+        setTimeout(updateMonkeys, updateDelay);
     }, function(err) {
         console.log("ERROR, bailing on requests: ", err);
     });
@@ -38,7 +51,7 @@ function getBullpen() { // monkeys not currently typing
         monkeys = JSON.parse(response)
         guts = "";
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
-            if(!monkey.Seated) guts += `<li><button onclick="sit(` + monkey.ID + `)">sit</button><strong>` + monkey.Name + `</strong>: ` + monkey.Progress;
+            if(!monkey.Seated) guts += `<li><button class="btn btn-success" onclick="sit(` + monkey.ID + `)">` +  monkey.Name + `</button>`;
         }
         document.getElementById("bullpen").innerHTML = guts;
     }, function(err) {

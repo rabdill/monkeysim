@@ -1,0 +1,3 @@
+[[constraint]]
+  name = "github.com/gin-gonic/gin"
+  revision = "9e895470ddd40a45f28dbe4e96bfb5e893d54f9e"

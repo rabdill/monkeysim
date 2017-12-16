@@ -1,9 +1,11 @@
 # MonkeySim Readme
 
+MonkeySim only has one requirement (other than Golang) -- it uses **dep** for dependency management. Check out [their repository](https://github.com/golang/dep) for info on how to install it locally. If you don't want to deal with all that, the only external dependency we currently have is **[gin-gonic/gin](github.com/gin-gonic/gin)**, so running `go get github.com/gin-gonic/gin` should work just as well as running `dep ensure`, at least for now.
+
 To run:
 ```
+dep ensure
 go build
-
 ./monkeysim
 ```
 

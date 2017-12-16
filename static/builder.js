@@ -22,7 +22,6 @@ function updateMonkeys() {
 function getSeatedMonkeys() {
     req('/seats').then(function(response) {
         monkeys = JSON.parse(response)
-        console.log(monkeys);
         guts = ``;
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
             guts += `<tr><td>` + monkey.Seat + `<td> ` + monkey.Keyboard + `<td>`;
@@ -53,7 +52,12 @@ function getBullpen() { // monkeys not currently typing
         for(var i=0, monkey; monkey = monkeys[i]; i++) {
             if(!monkey.Seated) guts += `<li><button class="btn btn-success" onclick="sit(` + monkey.ID + `)">` +  monkey.Name + `</button>`;
         }
-        document.getElementById("bullpen").innerHTML = guts;
+        if(guts) {
+            document.getElementById("bullpen").innerHTML = guts;
+        } else {
+            document.getElementById("bullpen").innerHTML = "all monkeys working";
+        }
+        
     }, function(err) {
         console.log(`ERROR, bailing on requests: `, err);
     });

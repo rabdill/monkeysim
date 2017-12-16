@@ -80,11 +80,13 @@ type Answer struct {
 	Name     string
 	Speed    float64
 	Progress string
+	Keyboard string
 	Seated   bool
 }
 
 // FetchResults turns the collection of monkey stats into a format
-// that can be read by the HTML templates.
+// that can be read by the HTML templates. This returns ONLY the monkeys
+// that are seated and working.
 func FetchResults() []Answer {
 	results := []Answer{}
 
@@ -93,7 +95,16 @@ func FetchResults() []Answer {
 		if monkey == nil {
 			results = append(results, Answer{Seat: i})
 		} else {
-			results = append(results, Answer{i, monkey.id, monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1]), monkey.seated})
+			toAdd := Answer{
+				Seat:     i,
+				ID:       monkey.id,
+				Name:     monkey.name,
+				Speed:    monkey.speed,
+				Progress: fmt.Sprintf("|%s|", Target[:monkey.highwater+1]),
+				Keyboard: seats[i].layout,
+				Seated:   monkey.seated,
+			}
+			results = append(results, toAdd)
 		}
 
 	}
@@ -101,7 +112,7 @@ func FetchResults() []Answer {
 }
 
 // FetchAll turns the collection of monkey stats into a format
-// that can be read by the HTML templates.
+// that can be read by the HTML templates. This returns ALL monkeys.
 func FetchAll() []Answer {
 	results := []Answer{}
 
@@ -110,7 +121,16 @@ func FetchAll() []Answer {
 		if monkey == nil {
 			results = append(results, Answer{Seat: i})
 		} else {
-			results = append(results, Answer{i, monkey.id, monkey.name, monkey.speed, fmt.Sprintf("|%s|", Target[:monkey.highwater+1]), monkey.seated})
+			toAdd := Answer{
+				Seat:     i,
+				ID:       monkey.id,
+				Name:     monkey.name,
+				Speed:    monkey.speed,
+				Progress: fmt.Sprintf("|%s|", Target[:monkey.highwater+1]),
+				Keyboard: seats[i].layout,
+				Seated:   monkey.seated,
+			}
+			results = append(results, toAdd)
 		}
 
 	}

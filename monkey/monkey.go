@@ -1,7 +1,6 @@
 package monkey
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -159,7 +158,6 @@ func convertTypingProfile(profile []int, layout string) string {
 		"dvorak":  "pyfgcrlaoeuidhtnsqjkxbmwvz ",
 		"colemak": "qwfpgjluyarstdhneiozxcvbkm ",
 	}
-	fmt.Printf("\n\nKEYBOARD: |%v|\n|||%v||||\n\n", layout, keyboards[layout])
 	for i := 0; i < 27; i++ {
 		for j := 0; j < profile[i]; j++ {
 			answer = answer + string(keyboards[layout][i])
